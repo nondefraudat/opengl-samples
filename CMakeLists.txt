@@ -1,7 +1,24 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(opengl-samples)
+set(DEPS_DIR deps)
+
+# Open GL
+find_package(OpenGL REQUIRED)
+list(APPEND PROJECT_INCS ${OPENGL_INCLUDE_DIR})
+list(APPEND PROJECT_LIBS ${OPENGL_LIBRARIES})
+
+# GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(${DEPS_DIR}/glfw)
+list(APPEND PROJECT_INCS ${DEPS_DIR}/glfw/include)
+list(APPEND PROJECT_LIBS glfw)
+
 
 file(GLOB_RECURSE PROJECT_SOURCES src/*)
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_INCS})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_LIBS})
