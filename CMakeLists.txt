@@ -21,6 +21,11 @@ add_subdirectory(${DEPS_DIR}/glew)
 list(APPEND PROJECT_INCS ${DEPS_DIR}/glew/include)
 list(APPEND PROJECT_LIBS glew_s)
 
+# GLM
+add_subdirectory(${DEPS_DIR}/glm)
+list(APPEND PROJECT_INCS ${DEPS_DIR}/glm)
+list(APPEND PROJECT_LIBS glm)
+
 # Target
 file(GLOB_RECURSE PROJECT_SOURCES src/*)
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
