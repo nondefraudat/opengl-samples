@@ -26,6 +26,12 @@ add_subdirectory(${DEPS_DIR}/glm)
 list(APPEND PROJECT_INCS ${DEPS_DIR}/glm)
 list(APPEND PROJECT_LIBS glm)
 
+# SOIL2
+add_subdirectory(${DEPS_DIR}/SOIL2)
+list(APPEND PROJECT_INCS ${DEPS_DIR}/SOIL2/src)
+list(APPEND PROJECT_LIBS soil2)
+
+
 # Target
 file(GLOB_RECURSE PROJECT_SOURCES src/*)
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
