@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 project(opengl-samples)
 set(DEPS_DIR deps)
@@ -16,7 +16,12 @@ add_subdirectory(${DEPS_DIR}/glfw)
 list(APPEND PROJECT_INCS ${DEPS_DIR}/glfw/include)
 list(APPEND PROJECT_LIBS glfw)
 
+# GLEW
+add_subdirectory(${DEPS_DIR}/glew)
+list(APPEND PROJECT_INCS ${DEPS_DIR}/glew/include)
+list(APPEND PROJECT_LIBS glew_s)
 
+# Target
 file(GLOB_RECURSE PROJECT_SOURCES src/*)
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
