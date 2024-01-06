@@ -1,5 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 #include <iostream>
 #include <string>
@@ -16,6 +19,12 @@ public:
     ~GLFWRAII() noexcept {
         glfwTerminate();
     }
+};
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 color;
+    glm::vec2 texcoord;
 };
 
 auto readAll(const char* const fileName) noexcept {
@@ -101,7 +110,6 @@ auto loadShaders() noexcept {
         showProgramLinkError(programId);
     }
 
-
     // Exit
 
     glUseProgram(0u);
@@ -177,6 +185,74 @@ int main() noexcept {
 
     // Model
 
+    // Vertices
+
+    Vertex vertices[] = {
+        glm::vec3(.0f, .5f, .0f),
+        glm::vec3(1.f, 0.f, 0.f),
+        glm::vec2(0.f, 1.f),
+
+        glm::vec3(-.5f, -.5f, .0f),
+        glm::vec3(0.f, 1.f, 0.f),
+        glm::vec2(0.f, 0.f),
+
+        glm::vec3(.5f, -.5f, .0f),
+        glm::vec3(0.f, 0.f, 1.f),
+        glm::vec2(1.f, 0.f)
+    };
+    constexpr auto verticesCount = sizeof(vertices)/sizeof(vertices[0]);
+
+    GLuint indeces[] = {
+        0, 1, 2
+    };
+    constexpr auto indecesCount = sizeof(indeces)/sizeof(indeces[0]); 
+
+    // VAO, VBO, EBO
+    // Gen VAO and Bind
+
+    GLuint vao;
+    glCreateVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // Gen VBO and Bind and send data
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER,
+            sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Gen EBO and Bind and send data
+
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+            sizeof(indeces), indeces, GL_STATIC_DRAW);
+
+    // Set vertex attribute pointers and enbale (input assembly)
+
+    // vertex_position
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, position)));
+    glEnableVertexAttribArray(0);
+
+    // vertex_color
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, color)));
+    glEnableVertexAttribArray(1);
+
+    // vertex_texcoord
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE, sizeof(Vertex),
+            reinterpret_cast<void*>(offsetof(Vertex, texcoord)));
+    glEnableVertexAttribArray(2);
+
+    // Bind VAO 0
+    glBindVertexArray(0u);
+
     // Main loop
 
     while (!glfwWindowShouldClose(window)) {
@@ -190,8 +266,24 @@ int main() noexcept {
 
         // Redraw
 
+        // Clear screen
+
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        // Use program
+
+        glUseProgram(programId);
+
+        // Bind vertex array object
+
+        glBindVertexArray(vao);
+
+        // Draw
+
+        glDrawElements(GL_TRIANGLES, indecesCount, GL_UNSIGNED_INT, 0);
+
+        // End draw
 
         glfwSwapBuffers(window);        
         glFlush(); // Rud
