@@ -31,6 +31,13 @@ add_subdirectory(${DEPS_DIR}/SOIL2)
 list(APPEND PROJECT_INCS ${DEPS_DIR}/SOIL2/src)
 list(APPEND PROJECT_LIBS soil2)
 
+# Copy shaders
+file(GLOB PROJECT_RESOURCES "shaders/*")
+foreach (RES_PATH ${PROJECT_RESOURCES})
+    get_filename_component(RES_NAME ${RES_PATH} NAME)
+    configure_file(${RES_PATH}
+    "${CMAKE_BINARY_DIR}/shaders/${RES_NAME}" COPYONLY)
+endforeach ()
 
 # Target
 file(GLOB_RECURSE PROJECT_SOURCES src/*)
