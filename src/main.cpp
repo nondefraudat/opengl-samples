@@ -188,22 +188,27 @@ int main() noexcept {
     // Vertices
 
     Vertex vertices[] = {
-        glm::vec3(.0f, .5f, .0f),
+        glm::vec3(.5f, -.5f, .0f),
         glm::vec3(1.f, 0.f, 0.f),
         glm::vec2(0.f, 1.f),
 
-        glm::vec3(-.5f, -.5f, .0f),
-        glm::vec3(0.f, 1.f, 0.f),
+        glm::vec3(.5f, .5f, .0f),
+        glm::vec3(1.f, 1.f, 0.f),
         glm::vec2(0.f, 0.f),
 
-        glm::vec3(.5f, -.5f, .0f),
+        glm::vec3(-.5f, .5f, .0f),
+        glm::vec3(0.f, 1.f, 0.f),
+        glm::vec2(1.f, 0.f),
+
+        glm::vec3(-.5f, -.5f, .0f),
         glm::vec3(0.f, 0.f, 1.f),
         glm::vec2(1.f, 0.f)
     };
     constexpr auto verticesCount = sizeof(vertices)/sizeof(vertices[0]);
 
     GLuint indeces[] = {
-        0, 1, 2
+        0, 1, 2,
+        0, 2, 3
     };
     constexpr auto indecesCount = sizeof(indeces)/sizeof(indeces[0]); 
 
@@ -281,6 +286,7 @@ int main() noexcept {
 
         // Draw
 
+        // glDrawArrays(GL_TRIANGLES, 0, verticesCount);
         glDrawElements(GL_TRIANGLES, indecesCount, GL_UNSIGNED_INT, 0);
 
         // End draw
