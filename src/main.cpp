@@ -116,6 +116,11 @@ auto processWindowInput(GLFWwindow* const window) noexcept {
     }
 }
 
+auto frameBufferResizeCallback(GLFWwindow* const window,
+        const int frameWidth, const int frameHeight) noexcept {
+    glViewport(0, 0, frameWidth, frameHeight);
+}
+
 int main() noexcept {
     // Init GLFW
 
@@ -126,7 +131,7 @@ int main() noexcept {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
@@ -134,11 +139,14 @@ int main() noexcept {
     constexpr auto width = 640u;
     constexpr auto height = 480u;
 
-    const auto window = glfwCreateWindow(width, height, "OpenGL Samples", nullptr, nullptr);
+    const auto window = glfwCreateWindow(width, height,
+            "OpenGL Samples", nullptr, nullptr);
 
-    GLsizei frameWidth, frameHeight;
-    glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
-    glViewport(0, 0, frameWidth, frameHeight);
+    glfwSetFramebufferSizeCallback(window, frameBufferResizeCallback);
+
+    // GLsizei frameWidth, frameHeight;
+    // glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
+    // glViewport(0, 0, frameWidth, frameHeight);
 
     glfwMakeContextCurrent(window);
 
