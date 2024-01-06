@@ -110,6 +110,12 @@ auto loadShaders() noexcept {
     return programId;
 }
 
+auto processWindowInput(GLFWwindow* const window) noexcept {
+    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+}
+
 int main() noexcept {
     // Init GLFW
 
@@ -170,7 +176,9 @@ int main() noexcept {
 
         glfwPollEvents();
 
-        // Update
+        // Process input
+
+        processWindowInput(window);
 
         // Redraw
 
