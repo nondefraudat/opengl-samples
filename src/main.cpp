@@ -1,187 +1,70 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
-#include <string>
 
-#include <glm/vec3.hpp> // glm::vec3
-#include <glm/vec4.hpp> // glm::vec4
-#include <glm/mat4x4.hpp> // glm::mat4
-#include <glm/ext/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale
-#include <glm/ext/matrix_clip_space.hpp> // glm::perspective
-#include <glm/ext/scalar_constants.hpp> // glm::pi
+class GLFWRAII {
+public:
+    GLFWRAII() noexcept {
+        glfwInit();
+    }
+    ~GLFWRAII() noexcept {
+        glfwTerminate();
+    }
+};
 
-#define _DEBUG
+int main() noexcept {
+    // Init GLFW
 
-glm::mat4 camera(float Translate, glm::vec2 const& Rotate)
-{
-	glm::mat4 Projection = glm::perspective(glm::pi<float>() * 0.25f, 4.0f / 3.0f, 0.1f, 100.f);
-	glm::mat4 View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -Translate));
-	View = glm::rotate(View, Rotate.y, glm::vec3(-1.0f, 0.0f, 0.0f));
-	View = glm::rotate(View, Rotate.x, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 Model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-	return Projection * View * Model;
-}
+    const auto glfwRAII = GLFWRAII();
 
-void PrintOpenGLErrors(char const * const Function, char const * const File, int const Line)
-{
-	bool Succeeded = true;
+    // Create Window
 
-	GLenum Error = glGetError();
-	if (Error != GL_NO_ERROR)
-	{
-		char const * ErrorString = (char const *) gluErrorString(Error);
-		if (ErrorString)
-			std::cerr << ("OpenGL Error in %s at line %d calling function %s: '%s'", File, Line, Function, ErrorString) << std::endl;
-		else
-			std::cerr << ("OpenGL Error in %s at line %d calling function %s: '%d 0x%X'", File, Line, Function, Error, Error) << std::endl;
-	}
-}
-
-#ifdef _DEBUG
-#define CheckedGLCall(x) do { PrintOpenGLErrors(">>BEFORE<< "#x, __FILE__, __LINE__); (x); PrintOpenGLErrors(#x, __FILE__, __LINE__); } while (0)
-#define CheckedGLResult(x) (x); PrintOpenGLErrors(#x, __FILE__, __LINE__);
-#define CheckExistingErrors(x) PrintOpenGLErrors(">>BEFORE<< "#x, __FILE__, __LINE__);
-#else
-#define CheckedGLCall(x) (x)
-#define CheckExistingErrors(x)
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
 
+    constexpr auto width = 640u;
+    constexpr auto height = 480u;
 
-void PrintShaderInfoLog(GLint const Shader)
-{
-	int InfoLogLength = 0;
-	int CharsWritten = 0;
+    const auto window = glfwCreateWindow(width, height, "OpenGL Samples", nullptr, nullptr);
 
-	glGetShaderiv(Shader, GL_INFO_LOG_LENGTH, & InfoLogLength);
+    GLsizei frameWidth, frameHeight;
+    glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
+    glViewport(0, 0, frameWidth, frameHeight);
 
-	if (InfoLogLength > 0)
-	{
-		GLchar * InfoLog = new GLchar[InfoLogLength];
-		glGetShaderInfoLog(Shader, InfoLogLength, & CharsWritten, InfoLog);
-		std::cout << "Shader Info Log:" << std::endl << InfoLog << std::endl;
-		delete [] InfoLog;
-	}
-}
+    glfwMakeContextCurrent(window);
 
-int main()
-{
-	GLFWwindow* window;
+    // Init GLEW (Needs Window)
 
-	if (! glfwInit())
-		return -1;
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cout << "GLEW init failed. Error:\n";
+        return 0;
+    }
 
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-	if (! window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
+    // Main loop
 
-	GLenum err = glewInit();
-	if (GLEW_OK != err)
-	{
-		std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
-		glfwTerminate();
-		return -1;
-	}
+    while (!glfwWindowShouldClose(window)) {
+        // Process events
 
-	char const * VertexShaderSource = R"GLSL(
-		#version 150
-		in vec2 position;
-		void main()
-		{
-			gl_Position = vec4(position, 0.0, 1.0);
-		}
-	)GLSL";
+        glfwPollEvents();
 
-	char const * FragmentShaderSource = R"GLSL(
-		#version 150
-		out vec4 outColor;
-		void main()
-		{
-			outColor = vec4(1.0, 1.0, 1.0, 1.0);
-		}
-	)GLSL";
+        // Update
 
-	GLfloat const Vertices [] = {
-		0.0f, 0.5f,
-		0.5f, -0.5f,
-		-0.5f, -0.5f
-	};
+        // Redraw
 
-	GLuint const Elements [] = {
-		0, 1, 2
-	};
+        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	GLuint VAO;
-	CheckedGLCall(glGenVertexArrays(1, & VAO));
-	CheckedGLCall(glBindVertexArray(VAO));
+        glfwSwapBuffers(window);        
+        glFlush(); // Rud
+    }
 
-	GLuint VBO;
-	CheckedGLCall(glGenBuffers(1, & VBO));
-	CheckedGLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-	CheckedGLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW));
-	CheckedGLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    // End of program
 
-	GLuint EBO;
-	CheckedGLCall(glGenBuffers(1, & EBO));
-	CheckedGLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO));
-	CheckedGLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Elements), Elements, GL_STATIC_DRAW));
-
-	GLint Compiled;
-	GLuint VertexShader = CheckedGLResult(glCreateShader(GL_VERTEX_SHADER));
-	CheckedGLCall(glShaderSource(VertexShader, 1, & VertexShaderSource, NULL));
-	CheckedGLCall(glCompileShader(VertexShader));
-	CheckedGLCall(glGetShaderiv(VertexShader, GL_COMPILE_STATUS, & Compiled));
-	if (! Compiled)
-	{
-		std::cerr << "Failed to compile vertex shader!" << std::endl;
-		PrintShaderInfoLog(VertexShader);
-	}
-
-	GLuint FragmentShader = CheckedGLResult(glCreateShader(GL_FRAGMENT_SHADER));
-	CheckedGLCall(glShaderSource(FragmentShader, 1, & FragmentShaderSource, NULL));
-	CheckedGLCall(glCompileShader(FragmentShader));
-	CheckedGLCall(glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, & Compiled));
-	if (! Compiled)
-	{
-		std::cerr << "Failed to compile fragment shader!" << std::endl;
-		PrintShaderInfoLog(FragmentShader);
-	}
-
-	GLuint ShaderProgram = CheckedGLResult(glCreateProgram());
-	CheckedGLCall(glAttachShader(ShaderProgram, VertexShader));
-	CheckedGLCall(glAttachShader(ShaderProgram, FragmentShader));
-	CheckedGLCall(glBindFragDataLocation(ShaderProgram, 0, "outColor"));
-	CheckedGLCall(glLinkProgram(ShaderProgram));
-	CheckedGLCall(glUseProgram(ShaderProgram));
-
-	GLint PositionAttribute = CheckedGLResult(glGetAttribLocation(ShaderProgram, "position"));
-	CheckedGLCall(glEnableVertexAttribArray(PositionAttribute));
-
-	CheckedGLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-	CheckedGLCall(glVertexAttribPointer(PositionAttribute, 2, GL_FLOAT, GL_FALSE, 0, 0));
-	CheckedGLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
-	while (! glfwWindowShouldClose(window))
-	{
-		CheckedGLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-		CheckedGLCall(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0));
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
-
-	CheckedGLCall(glDeleteProgram(ShaderProgram));
-	CheckedGLCall(glDeleteShader(FragmentShader));
-	CheckedGLCall(glDeleteShader(VertexShader));
-
-	CheckedGLCall(glDeleteBuffers(1, & EBO));
-	CheckedGLCall(glDeleteBuffers(1, & VBO));
-	CheckedGLCall(glDeleteVertexArrays(1, & VAO));
-
-	glfwTerminate();
-	return 0;
+    return 0;
 }
