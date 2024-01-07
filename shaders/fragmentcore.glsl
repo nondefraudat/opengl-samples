@@ -6,6 +6,8 @@ in vec2 vs_texcoord;
 
 out vec4 fs_color;
 
+uniform sampler2D texture0;
+
 void main() {
-    fs_color = vec4(vs_color, 1.f);
+    fs_color = vec4(vs_color, 1.f)*texture(texture0, vs_texcoord);
 }

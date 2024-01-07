@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
+#include <SOIL2/SOIL2.h>
 
 #include <iostream>
 #include <string>
@@ -190,19 +191,19 @@ int main() noexcept {
     Vertex vertices[] = {
         glm::vec3(.5f, -.5f, .0f),
         glm::vec3(1.f, 0.f, 0.f),
-        glm::vec2(0.f, 1.f),
+        glm::vec2(1.f, 0.f),
 
         glm::vec3(.5f, .5f, .0f),
         glm::vec3(1.f, 1.f, 0.f),
-        glm::vec2(0.f, 0.f),
+        glm::vec2(1.f, 1.f),
 
         glm::vec3(-.5f, .5f, .0f),
         glm::vec3(0.f, 1.f, 0.f),
-        glm::vec2(1.f, 0.f),
+        glm::vec2(0.f, 1.f),
 
         glm::vec3(-.5f, -.5f, .0f),
         glm::vec3(0.f, 0.f, 1.f),
-        glm::vec2(1.f, 0.f)
+        glm::vec2(0.f, 0.f)
     };
     constexpr auto verticesCount = sizeof(vertices)/sizeof(vertices[0]);
 
@@ -258,6 +259,34 @@ int main() noexcept {
     // Bind VAO 0
     glBindVertexArray(0u);
 
+    // Texture init
+    
+    auto imageWidth = 0;
+    auto imageHeight = 0;
+    const auto image = SOIL_load_image("rsc/default.png", &imageWidth, &imageHeight, nullptr, SOIL_LOAD_RGBA);
+
+    GLuint defaultTexture;
+    glGenTextures(1, &defaultTexture);
+    glBindTexture(GL_TEXTURE_2D, defaultTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    if (image) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "Texture loading failed\n";
+    }
+
+    glActiveTexture(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    SOIL_free_image_data(image);
+
     // Main loop
 
     while (!glfwWindowShouldClose(window)) {
@@ -274,11 +303,22 @@ int main() noexcept {
         // Clear screen
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT |
+                GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // Use program
 
         glUseProgram(programId);
+
+        // Update uniforms
+
+        auto uniformLocation = glGetUniformLocation(programId, "texture0");
+        glUniform1i(uniformLocation, 0);
+
+        // Activate texture
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, defaultTexture);
 
         // Bind vertex array object
 
