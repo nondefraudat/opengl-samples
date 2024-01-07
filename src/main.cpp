@@ -27,7 +27,7 @@ struct Vertex {
     glm::vec2 texcoord;
 };
 
-auto readAll(const char* const fileName) noexcept {
+static auto readAll(const char* const fileName) noexcept {
     auto file = std::ifstream(fileName);
     file.seekg(0, std::ios::end);
     auto buffer = std::string(static_cast<size_t>(file.tellg()), '\0');
@@ -37,7 +37,7 @@ auto readAll(const char* const fileName) noexcept {
     return buffer;
 }
 
-auto compileShader(const int shaderFlag,
+static auto compileShader(const int shaderFlag,
         const char* const srcName) noexcept {
     const auto shaderId = glCreateShader(shaderFlag);
     auto fileContent = readAll(srcName);
@@ -47,7 +47,7 @@ auto compileShader(const int shaderFlag,
     return shaderId;
 }
 
-auto showShaderCompileError(const GLint shaderId) noexcept {
+static auto showShaderCompileError(const GLint shaderId) noexcept {
     const auto bufferSize = 512;
     char buffer[bufferSize];
     glGetShaderInfoLog(shaderId,
@@ -56,7 +56,7 @@ auto showShaderCompileError(const GLint shaderId) noexcept {
             buffer << std::endl;
 }
 
-auto loadShader(const int shaderFlag,
+static auto loadShader(const int shaderFlag,
         const char* const srcName) noexcept {
     const auto shaderId = compileShader(shaderFlag, srcName);
     GLint success;
@@ -68,7 +68,7 @@ auto loadShader(const int shaderFlag,
     return shaderId;
 }
 
-auto showProgramLinkError(const GLint programId) noexcept {
+static auto showProgramLinkError(const GLint programId) noexcept {
     const auto bufferSize = 512;
     char buffer[bufferSize];
     glGetProgramInfoLog(programId,
@@ -79,7 +79,7 @@ auto showProgramLinkError(const GLint programId) noexcept {
 
 using RType = std::result_of_t<decltype(glCreateProgram)()>;
 
-auto loadShaders() noexcept {
+static auto loadShaders() noexcept {
     // Load
 
     const auto vertexShaderId = loadShader(
@@ -118,13 +118,13 @@ auto loadShaders() noexcept {
     return programId;
 }
 
-auto processWindowInput(GLFWwindow* const window) noexcept {
+static auto processWindowInput(GLFWwindow* const window) noexcept {
     if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 }
 
-auto frameBufferResizeCallback(GLFWwindow* const window,
+static auto frameBufferResizeCallback(GLFWwindow* const window,
         const int frameWidth, const int frameHeight) noexcept {
     glViewport(0, 0, frameWidth, frameHeight);
 }
