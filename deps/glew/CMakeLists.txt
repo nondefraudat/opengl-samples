@@ -108,7 +108,7 @@ set (GLEW_PUBLIC_HEADERS_FILES
 set (GLEW_SRC_FILES src/glew.c)
 
 if (WIN32)
-  list (APPEND GLEW_SRC_FILES ${GLEW_DIR}/build/glew.rc)
+  # list (APPEND GLEW_SRC_FILES ${GLEW_DIR}/auto/src/glew.rc)
 endif ()
 
 add_library (glew SHARED ${GLEW_PUBLIC_HEADERS_FILES} ${GLEW_SRC_FILES})
@@ -180,7 +180,7 @@ install ( TARGETS ${targets_to_install}
 if (BUILD_UTILS)
   set (GLEWINFO_SRC_FILES src/glewinfo.c)
   if (WIN32)
-    list (APPEND GLEWINFO_SRC_FILES ${GLEW_DIR}/build/glewinfo.rc)
+    list (APPEND GLEWINFO_SRC_FILES ${GLEW_DIR}/auto/src/glewinfo.rc)
   endif ()
   add_executable (glewinfo ${GLEWINFO_SRC_FILES})
   if(BUILD_SHARED_LIBS)
@@ -194,7 +194,7 @@ if (BUILD_UTILS)
 
   set (VISUALINFO_SRC_FILES ${GLEW_DIR}/src/visualinfo.c)
   if (WIN32)
-    list (APPEND VISUALINFO_SRC_FILES ${GLEW_DIR}/build/visualinfo.rc)
+    # list (APPEND VISUALINFO_SRC_FILES ${GLEW_DIR}/auto/src/visualinfo.rc)
   endif ()
   add_executable (visualinfo ${VISUALINFO_SRC_FILES})
   if(BUILD_SHARED_LIBS)
