@@ -32,11 +32,19 @@ list(APPEND PROJECT_INCS ${DEPS_DIR}/SOIL2/src)
 list(APPEND PROJECT_LIBS soil2)
 
 # Copy shaders
-file(GLOB PROJECT_RESOURCES "shaders/*")
-foreach (RES_PATH ${PROJECT_RESOURCES})
-    get_filename_component(RES_NAME ${RES_PATH} NAME)
-    configure_file(${RES_PATH}
-    "${CMAKE_BINARY_DIR}/shaders/${RES_NAME}" COPYONLY)
+file(GLOB PROJECT_SHADERS "shaders/*")
+foreach (FILE_PATH ${PROJECT_SHADERS})
+    get_filename_component(FILE_NAME ${FILE_PATH} NAME)
+    configure_file(${FILE_PATH}
+    "${CMAKE_BINARY_DIR}/shaders/${FILE_NAME}" COPYONLY)
+endforeach ()
+
+#Copy resources
+file(GLOB PROJECT_RESOURCES "rsc/*")
+foreach (FILE_PATH ${PROJECT_RESOURCES})
+    get_filename_component(FILE_NAME ${FILE_PATH} NAME)
+    configure_file(${FILE_PATH}
+    "${CMAKE_BINARY_DIR}/rsc/${FILE_NAME}" COPYONLY)
 endforeach ()
 
 # Target
