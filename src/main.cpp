@@ -130,6 +130,36 @@ static auto frameBufferResizeCallback(GLFWwindow* const window,
     glViewport(0, 0, frameWidth, frameHeight);
 }
 
+static auto loadTexture(const char* const imageName) noexcept {
+    auto imageWidth = 0;
+    auto imageHeight = 0;
+    const auto image = SOIL_load_image(imageName,
+            &imageWidth, &imageHeight, nullptr, SOIL_LOAD_RGBA);
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    if (image) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+            imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "Texture \"" << imageName << "\" loading failed\n";
+    }
+
+    glActiveTexture(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    SOIL_free_image_data(image);
+    return texture;
+}
+
 int main() noexcept {
     // Init GLFW
 
@@ -261,31 +291,8 @@ int main() noexcept {
 
     // Texture init
     
-    auto imageWidth = 0;
-    auto imageHeight = 0;
-    const auto image = SOIL_load_image("rsc/default.png", &imageWidth, &imageHeight, nullptr, SOIL_LOAD_RGBA);
-
-    GLuint defaultTexture;
-    glGenTextures(1, &defaultTexture);
-    glBindTexture(GL_TEXTURE_2D, defaultTexture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    if (image) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else {
-        std::cout << "Texture loading failed\n";
-    }
-
-    glActiveTexture(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    SOIL_free_image_data(image);
+    const auto ilufanTexture = loadTexture("rsc/ilufan.png");
+    const auto boxTexture = loadTexture("rsc/box.png");
 
     // Main loop
 
@@ -310,15 +317,24 @@ int main() noexcept {
 
         glUseProgram(programId);
 
+
         // Update uniforms
 
-        auto uniformLocation = glGetUniformLocation(programId, "texture0");
-        glUniform1i(uniformLocation, 0);
+        const auto ilufanTextureLocation = glGetUniformLocation(
+                programId, "ilufanTexture");
+        glUniform1i(ilufanTextureLocation, 0);
+
+        const auto boxTextureLocation = glGetUniformLocation(
+            programId, "boxTexture");
+        glUniform1i(boxTextureLocation, 1);
 
         // Activate texture
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, defaultTexture);
+        glBindTexture(GL_TEXTURE_2D, ilufanTexture);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, boxTexture);
 
         // Bind vertex array object
 
