@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
+#include <glm/ext.hpp>
 #include <SOIL2/SOIL2.h>
 
 #include <iostream>
@@ -181,6 +182,10 @@ int main() noexcept {
     const auto window = glfwCreateWindow(width, height,
             "OpenGL Samples", nullptr, nullptr);
 
+    auto frameBufferWidth = 0;
+    auto frameBufferHeight = 0;
+    glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
+
     glfwSetFramebufferSizeCallback(window, frameBufferResizeCallback);
 
     // GLsizei frameWidth, frameHeight;
@@ -294,6 +299,43 @@ int main() noexcept {
     const auto ilufanTexture = loadTexture("rsc/ilufan.png");
     const auto boxTexture = loadTexture("rsc/box.png");
 
+    // Init metrics
+
+    auto modelMatrix = glm::mat4(1.f);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.f));
+    //modelMatrix = glm::rotate(modelMatrix,
+    //        glm::radians(3.f), glm::vec3(1.f, 0.f, 0.f));
+    //modelMatrix = glm::rotate(modelMatrix,
+    //        glm::radians(0.f), glm::vec3(0.f, 1.f, 0.f));
+    //modelMatrix = glm::rotate(modelMatrix,
+    //        glm::radians(0.f), glm::vec3(0.f, 0.f, 1.f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(.05f));
+
+    auto camPosition = glm::vec3(0.f, 0.f, 1.f);
+    auto worldUp = glm::vec3(0.f, 1.f, 0.f);
+    auto camFront = glm::vec3(0.f, 0.f, -1.f);
+    auto viewMatrix = glm::mat4(1.f);
+    
+    viewMatrix = glm::lookAt(camPosition, camPosition + camFront, worldUp);
+
+    const auto fov = 90.f;
+    const auto nearPlane = .1f;
+    const auto farPlane = 5000.f;
+    auto projectionMatrix = glm::perspective(glm::radians(fov),
+            static_cast<float>(frameBufferWidth)/frameBufferHeight,
+            nearPlane, farPlane);
+
+    glUseProgram(programId);
+
+    glUniformMatrix4fv(glGetUniformLocation(programId, "modelMatrix"),
+            1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(programId, "viewMatrix"),
+            1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(programId, "projectionMatrix"),
+            1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+    glUseProgram(0);
+
     // Main loop
 
     while (!glfwWindowShouldClose(window)) {
@@ -327,6 +369,27 @@ int main() noexcept {
         const auto boxTextureLocation = glGetUniformLocation(
             programId, "boxTexture");
         glUniform1i(boxTextureLocation, 1);
+
+        // Move, rotate, scale matrix
+
+        modelMatrix = glm::rotate(modelMatrix,
+                glm::radians(1.f), glm::vec3(0.f, 1.f, 0.f));
+        //modelMatrix = glm::rotate(modelMatrix,
+        //        glm::radians(.5f), glm::vec3(0.f, 1.f, 0.f));
+        //modelMatrix = glm::rotate(modelMatrix,
+        //        glm::radians(.1f), glm::vec3(0.f, 0.f, 1.f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(1.001f));
+        const auto unipos = glGetUniformLocation(programId, "modelMatrix");
+        glUniformMatrix4fv(unipos, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+        glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
+
+        projectionMatrix = glm::perspective(glm::radians(fov),
+                static_cast<float>(frameBufferWidth) / frameBufferHeight,
+                nearPlane, farPlane);
+
+        glUniformMatrix4fv(glGetUniformLocation(programId, "projectionMatrix"),
+                1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
         // Activate texture
 
